@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  web:
+    build: ./web
+    image: loomo-web:latest
+    restart: always
+    ports:
+      - "80:4000"
+      # map in debug port
+      - "9222:9222"
+    environment:
+      - DEBUG=*,-web:*
+      - NODE_ENV=development
+    volumes:
+      - ./data:/www/data
+      # map in src directory so nodemon can watch it
+      - ./web/src:/www/src
+    # change run command to use nodemon
+    #
+    # Break on start to aid startup debugging
+    command: /www/node_modules/.bin/nodemon --watch src/ --inspect-brk=0.0.0.0:9222 --nolazy src/app.js
+    # Start without breaking (nice for inner loop developing)
+    #command: /www/node_modules/.bin/nodemon --watch src/ --inspect=0.0.0.0:9222 --nolazy src/app.js

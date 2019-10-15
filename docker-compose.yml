@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  web:
+    build: ./web
+    image: loomo-web:latest
+    restart: always
+    ports:
+      - "80:4000"
+    environment:
+      - DEBUG=*,-web:*
+    volumes:
+      - ./data:/www/data
