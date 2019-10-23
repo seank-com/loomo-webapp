@@ -8,12 +8,9 @@ var debugApp = debug('app');
 
 var http = require('http');
 var express = require('express');
-var busboy = require('connect-busboy');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
-
-var database = require('./services/database');
 
 var auth = require('./auth');
 var routes = require('./routes');
@@ -31,8 +28,6 @@ app.use(logger(':remote-addr :remote-user [:date[iso]] :method :url HTTP/:http-v
 // setup body-parser (now included in Express)
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// mime upload support
-app.use(busboy());
 
 // setup serve-static (now included in Express)
 app.use(express.static(path.join(__dirname, 'public')));
@@ -99,26 +94,15 @@ app.set('port', port);
 // Create HTTP server.
 var server = http.createServer(app);
 
-// connect to database, we are nothing without data
-database.init((err) => {
-  if (err) {
-    debugApp('database connection failed ');
-    console.error(err);
-    process.exit(1);
-  } else {
-    // Listen on provided port, on all network interfaces.
-    debugApp('starting server');
-    server.listen(port);
-    server.on('error', onError);
-    server.on('listening', onListening);
-  }
-});
+// Listen on provided port, on all network interfaces.
+debugApp('starting server');
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
 
 // docker send a SIGTERM for graceful shutdown, 
 // lets atleast try to be a good citizen.
 process.on('SIGTERM', () => {
-  database.close(()=> {
-    debugApp('exiting process');
-    process.exit(0);
-  });
+  debugApp('exiting process');
+  process.exit(0);
 });

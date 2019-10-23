@@ -3,18 +3,14 @@ var createError = require('http-errors');
 
 var indexRoutes = require('./routes/index');
 var apiRoutes = require('./routes/api');
-var postersRoutes = require('./routes/posters');
-var themesRoutes = require('./routes/themes');
-var usersRoutes = require('./routes/users');
+var picturesRoutes = require('./routes/pictures');
 
 function init(app) {
   // Setup Routes
   app.use('/', indexRoutes);
   app.use('/api', apiRoutes);
-  app.use('/posters', postersRoutes);
-  app.use('/themes', themesRoutes);
-  app.use('/users', usersRoutes);
-
+  app.use('/pictures', picturesRoutes);
+  
   // catch 404 and forward to error handler
   app.use((req, res, next) => {
     debugRoutes('creating 404');

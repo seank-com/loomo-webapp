@@ -42,9 +42,7 @@ function init(app) {
     res.locals.navlinks = [];
     [
       {ref: '/', icon: 'fa-home', title: 'Dashboard', description: 'This is where everything begins.'},
-      {ref: '/posters', icon: 'fa-photo', title: 'Posters', description: 'Where all the creative work happens.'},
-      {ref: '/themes', icon: 'fa-folder', title: 'Themes', description: 'The categories to group posters under.'},
-      {ref: '/users', icon: 'fa-users', title: 'Users', description: 'The people that can log in and make changes to the system.'}
+      {ref: '/pictures', icon: 'fa-photo', title: 'Photos', description: 'The people Loomo has seens.'},
     ].forEach((link) => {
       if (link.ref === req.url) {
         link.active = 'active';
