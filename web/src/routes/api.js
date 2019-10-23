@@ -60,21 +60,21 @@ function uploadBlob(name, data, datatype, callback) {
 
 function detectFace(imageURI, callback) {
   var req = {},
-    uri = process.env.COGNITIVE_SERVICES_DETECT_FACE_URI,
+    uri = process.env.COGNITIVE_SERVICES_FACE_DETECT_URI,
     options = url.parse(uri),
     body = JSON.stringify({
       url: imageURI
     });
   
-    options.method = "POST";
-    options.headers = {
-      "Ocp-Apim-Subscription-Key": process.env.COGNITIVE_SERVICES_SUBSCRIPTION_KEY,
-      "Content-Type": "application/json",
-      "Content-Length": Buffer.byteLength(body)
-    };
+  options.method = "POST";
+  options.headers = {
+    "Ocp-Apim-Subscription-Key": process.env.COGNITIVE_SERVICES_SUBSCRIPTION_KEY,
+    "Content-Type": "application/json",
+    "Content-Length": Buffer.byteLength(body)
+  };
 
-    executeRequest(options, body, callback);
-  }
+  executeRequest(options, body, callback);
+}
 
 router.put('/recognize', function(req, res) {
   var uuid = utils.uuidgen(),
@@ -96,13 +96,28 @@ router.put('/recognize', function(req, res) {
             } else {
               receiveBody(detectRes, function(err, buffer) {
                 var jsonName = uuid + ".json";
-                uploadBlob(jsonName, buffer.toString(), "application/json", function(err, bres) {
-                  if (err) {
-                    res.status(500),json({ error: err.message});
-                  } else {
-                    res.status(200).json({ id: uuid });
-                  }
-                });  
+                if (err) {
+                  res.status(500).json({error: err.message});
+                } else {
+
+                  // {
+                  //   "largePersonGroupId": "sample_group",
+                  //   "faceIds": [
+                  //       "c5c24a82-6845-4031-9d5d-978df9175426",
+                  //       "65d083d4-9447-47d1-af30-b626144bf0fb"
+                  //   ],
+                  //   "maxNumOfCandidatesReturned": 1,
+                  //   "confidenceThreshold": 0.5
+                  // }
+
+                  uploadBlob(jsonName, buffer.toString(), "application/json", function(err, bres) {
+                    if (err) {
+                      res.status(500),json({ error: err.message});
+                    } else {
+                      res.status(200).json({ id: uuid });
+                    }
+                  });  
+                }
               });
             }
           });
