@@ -1,4 +1,4 @@
-FROM node:11-alpine as base
+FROM node:alpine as base
 
 RUN apk update && apk add --no-cache tini
 
