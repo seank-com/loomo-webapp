@@ -1,3 +1,4 @@
+var debugAuth = require('debug')('auth');
 var cookieSession = require('cookie-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
@@ -18,9 +19,11 @@ var admin = {
 function validateUser(username, password, done) {
   var hash = crypto.createHash('sha256').update(password).digest('base64');
   if (admin.username === username && admin.hash === hash) {
-   return done(null, admin);
+    debugAuth("user authorized");
+    return done(null, admin);
   } else {
-   return done(null, false);
+    debugAuth("user not authorized");
+    return done(null, false);
   }
 }
 
@@ -32,6 +35,7 @@ function deserializeUser(id, done) {
   if (admin.id === id) {
     done(null, admin);
   } else {
+    debugAuth("cannot deserialize user");
     done(new Error("cannot deserialize user"))
   }
 }

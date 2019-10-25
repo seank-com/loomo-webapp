@@ -2,6 +2,8 @@
 /**
  * Module dependencies.
  */
+var config = require('./config');
+
 var debug = require('debug');
 var debugHttp = debug('http');
 var debugApp = debug('app');

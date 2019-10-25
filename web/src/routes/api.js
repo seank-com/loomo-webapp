@@ -1,3 +1,5 @@
+var debugApi = require('debug')('api');
+
 var express = require('express');
 var utils = require('../utils/utils');
 var crypto = require('crypto');
@@ -32,6 +34,8 @@ function executeRequest(options, data, callback) {
       // All other errors
       err = new Error("Bad statusCode " + res.statusCode);
       err.res = res;
+
+      debugApi("Bad statusCode " + res.statusCode);
       callback(err, null);
     }
   });
@@ -55,6 +59,7 @@ function uploadBlob(name, data, datatype, callback) {
     "Content-Length": Buffer.byteLength(data)
   };
 
+  debugApi("uploading Blob " + name + " (" + Buffer.byteLength(data) + " bytes)");
   executeRequest(options, data, callback);
 }
 
@@ -73,6 +78,7 @@ function detectFace(imageURI, callback) {
     "Content-Length": Buffer.byteLength(body)
   };
 
+  debugApi("detecting face in " + imageURI);
   executeRequest(options, body, callback);
 }
 
@@ -82,23 +88,29 @@ router.put('/recognize', function(req, res) {
 
   receiveBody(req, function(err, buffer) {
     if (err) {
-      res.status(500).json({ error: err.message});
+      debugApi("receiveBody failed: " + err.message);
+      res.status(500).json({error: err.message});
     } else {
       uploadBlob(name, buffer, "image/jpeg", function(err, bres) {
         if (err) {
-          res.status(500).json({
-            error: err.message
-          });
+          debugApi("uploadBlob failed: " + err.message);
+          res.status(500).json({error: err.message});
         } else {
           detectFace(process.env.BLOB_CONTAINER_URI_PATH + name, function(err, detectRes) {
             if (err) {
+              detectFace("uploadBlob failed: " + err.message);
               res.status(500).json({error: err.message});
             } else {
               receiveBody(detectRes, function(err, buffer) {
                 var jsonName = uuid + ".json";
+
                 if (err) {
+                  detectFace("receiveBody failed: " + err.message);
                   res.status(500).json({error: err.message});
                 } else {
+
+                  var results = JSON.parse(buffer.toString());
+                    faces = results.map(x => x.faceId);
 
                   // {
                   //   "largePersonGroupId": "sample_group",
@@ -110,11 +122,12 @@ router.put('/recognize', function(req, res) {
                   //   "confidenceThreshold": 0.5
                   // }
 
-                  uploadBlob(jsonName, buffer.toString(), "application/json", function(err, bres) {
+                  uploadBlob(jsonName, JSON.stringify(results, null, 2), "application/json", function(err, bres) {
                     if (err) {
+                      detectFace("uploadBlob failed: " + err.message);
                       res.status(500),json({ error: err.message});
                     } else {
-                      res.status(200).json({ id: uuid });
+                      res.status(200).json({ id: uuid, faces: faces });
                     }
                   });  
                 }
